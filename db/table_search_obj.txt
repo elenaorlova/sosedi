@@ -1,0 +1,38 @@
+# Таблица объявлений о поиске товара в аренду.
+
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM search_obj;
+
+DROP TABLE search_obj;
+
+CREATE TABLE search_obj (
+    id          INTEGER PRIMARY KEY,
+    u_id        INTEGER NOT NULL,
+    obj_name    STRING  NOT NULL,
+    obj_comment STRING  UNIQUE,
+    u_name      STRING  NOT NULL,
+    region      STRING
+);
+
+INSERT INTO search_obj (
+                           id,
+                           u_id,
+                           obj_name,
+                           obj_comment,
+                           u_name,
+                           region
+                       )
+                       SELECT id,
+                              u_id,
+                              obj_name,
+                              obj_comment,
+                              u_name,
+                              region
+                         FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;
+

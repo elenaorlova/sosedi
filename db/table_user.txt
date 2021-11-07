@@ -1,0 +1,42 @@
+# Таблица регистрации пользователя.
+
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM user;
+
+DROP TABLE user;
+
+CREATE TABLE user (
+    id                INTEGER PRIMARY KEY,
+    user_id           INTEGER UNIQUE
+                              NOT NULL,
+    user_name         STRING  NOT NULL,
+    user_region       STRING  NOT NULL,
+    user_registration INTEGER,
+    search_message    STRING,
+    chat_id           INTEGER UNIQUE
+);
+
+INSERT INTO user (
+                     id,
+                     user_id,
+                     user_name,
+                     user_region,
+                     user_registration,
+                     search_message,
+                     chat_id
+                 )
+                 SELECT id,
+                        user_id,
+                        user_name,
+                        user_region,
+                        user_registration,
+                        search_message,
+                        chat_id
+                   FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;
+

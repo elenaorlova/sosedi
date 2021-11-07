@@ -1,0 +1,46 @@
+# Таблица для обьявлений о сдаче товара.
+
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM obj;
+
+DROP TABLE obj;
+
+CREATE TABLE obj (
+    id            INTEGER PRIMARY KEY,
+    u_id          INTEGER NOT NULL,
+    name_cat1_obj STRING  NOT NULL,
+    money_cat1    INTEGER,
+    cat_1         STRING,
+    user_name     STRING,
+    photo         INTEGER,
+    category      STRING,
+    region        STRING
+);
+
+INSERT INTO obj (
+                    id,
+                    u_id,
+                    name_cat1_obj,
+                    money_cat1,
+                    cat_1,
+                    user_name,
+                    photo,
+                    category,
+                    region
+                )
+                SELECT id,
+                       u_id,
+                       name_cat1_obj,
+                       money_cat1,
+                       cat_1,
+                       user_name,
+                       photo,
+                       category,
+                       region
+                  FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;
