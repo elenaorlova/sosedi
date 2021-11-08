@@ -1,2 +1,4 @@
 # Сохраняем сюда токен для удобного использования
-TOKEN = ''  # bot TOKEN from @BotFather
+import os
+
+TOKEN = os.getenv("BOT_TOKEN")  # bot TOKEN from @BotFather
