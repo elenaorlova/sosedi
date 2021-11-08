@@ -1,0 +1,9 @@
+version: "3.3"
+
+services:
+  workbot:
+    build: .
+    restart: always
+    volumes:
+      - "./db:/usr/src/app/src/db"
+    env_file: ".env"
