@@ -27,9 +27,9 @@ def main():
     # Главное меню
     def main_menu(message, t):
         keyboard_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button_menu = ['Сдать', 'Снять', 'Посмотреть мои обьявления']
-        keyboard_main.add(button_menu[0], button_menu[1])
-        keyboard_main.add(button_menu[2])
+        button_menu = ['Сдать', 'Меню', 'Снять', 'Посмотреть мои обьявления']
+        keyboard_main.add(button_menu[0], button_menu[1], button_menu[2])
+        keyboard_main.add(button_menu[3])
         bot.send_message(message.chat.id, t, parse_mode='html', reply_markup=keyboard_main)
 
         markup = types.InlineKeyboardMarkup()
@@ -55,7 +55,6 @@ def main():
         return msg
 
     def how_many_obj(category, u_id):
-        print(u_id)
         cursor.execute(
             'SELECT COUNT(category) FROM obj WHERE category = ? '
             'AND region = (SELECT user_region FROM user WHERE user_id = ?)',
@@ -89,8 +88,6 @@ def main():
                 u_name = message.from_user.first_name
                 t = 'Чем займемся сегодня, {}?'.format(u_name)
                 main_menu(message, t)
-
-                print(2)
 
     # ----------------------APPLY() - О СОГЛАСИИ УВЕДОМЛЕНИЙ--------------------------------
     def apply(message):
@@ -281,6 +278,11 @@ def main():
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_message_init)
 
+        # --------MENU--------
+        if call.data == 'menu':
+            t = 'Главное меню'
+            main_menu(message, t)
+
         # ---------СДАЕМ---------
         if call.data == '1':
             u_id = call.from_user.id
@@ -309,6 +311,8 @@ def main():
             key10 = types.InlineKeyboardButton('Музыка и хобби ({})'.format(how_many_obj('Музыка и хобби', u_id)),
                                                callback_data='1-10')
             key11 = types.InlineKeyboardButton('Прочее ({})'.format(how_many_obj('Прочее', u_id)), callback_data='1-11')
+            key12 = types.InlineKeyboardButton('В̲ы̲й̲т̲и̲ ̲в̲ ̲М̲Е̲Н̲Ю̲', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -350,6 +354,8 @@ def main():
             key10 = types.InlineKeyboardButton('Музыка и хобби ({})'.format(how_many_obj('Музыка и хобби', u_id)),
                                                callback_data='2-10')
             key11 = types.InlineKeyboardButton('Прочее ({})'.format(how_many_obj('Прочее', u_id)), callback_data='2-11')
+            key12 = types.InlineKeyboardButton('В̲ы̲й̲т̲и̲ ̲в̲ ̲М̲Е̲Н̲Ю̲', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -1662,6 +1668,10 @@ def main():
             markup.row(key1)
             markup.row(key2)
             bot.send_message(message.chat.id, t, reply_markup=markup)
+
+        if message.text == 'Меню':
+            t = 'Главное Меню'
+            main_menu(message, t)
 
     # ------------------------------------------------------------------------------------------------------------------
 
