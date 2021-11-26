@@ -62,9 +62,9 @@ def main():
         how_many = ((str(cursor.fetchone())).split(',')[0]).strip('(')
         print(how_many)
         if how_many == '0':
-            return '↢'
+            return ' '
         else:
-            how_many = '↢(' + how_many + ')'
+            how_many = ' (' + how_many + ')'
             return how_many
 
     # ------------------------------Функция для регистрации пользователя------------------------------------------------
@@ -290,34 +290,32 @@ def main():
 
         # ---------СДАЕМ---------
         if call.data == '1':
-            u_id = call.from_user.id
             t = 'Здорово, что ты готов сдать что-то в аренду! Я помогу тебе составить объявление. ' \
                 'Давай начнем с категории товара, который ты бы хотел сдать в аренду. Выбери подходящее:'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео {}'.format(how_many_obj('Фото и видео', u_id)),
+            key1 = types.InlineKeyboardButton('Фото и видео',
                                               callback_data='1-1')
-            key2 = types.InlineKeyboardButton('Техника для дома {}'.format(how_many_obj('Техника для дома', u_id)),
+            key2 = types.InlineKeyboardButton('Техника для дома',
                                               callback_data='1-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли {}'.format(how_many_obj('Игры и консоли', u_id)),
+            key3 = types.InlineKeyboardButton('Игры и консоли',
                                               callback_data='1-3')
             key4 = types.InlineKeyboardButton(
-                'Туризм и путешествия {}'.format(how_many_obj('Туризм и путешествия', u_id)),
+                'Туризм и путешествия',
                 callback_data='1-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель {}'.format(how_many_obj('Декор и мебель', u_id)),
+            key5 = types.InlineKeyboardButton('Декор и мебель',
                                               callback_data='1-5')
-            key6 = types.InlineKeyboardButton('Детские товары {}'.format(how_many_obj('Детские товары', u_id)),
+            key6 = types.InlineKeyboardButton('Детские товары',
                                               callback_data='1-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий {}'.format(how_many_obj('Для мероприятий', u_id)),
+            key7 = types.InlineKeyboardButton('Для мероприятий',
                                               callback_data='1-7')
-            key8 = types.InlineKeyboardButton('Инструменты {}'.format(how_many_obj('Инструменты', u_id)),
+            key8 = types.InlineKeyboardButton('Инструменты',
                                               callback_data='1-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта {}'.format(how_many_obj('Товары для спорта', u_id)),
+            key9 = types.InlineKeyboardButton('Товары для спорта',
                                               callback_data='1-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
+            key10 = types.InlineKeyboardButton('Музыка и хобби',
                                                callback_data='1-10')
-            key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='1-11')
-            key12 = types.InlineKeyboardButton('В̲ы̲й̲т̲и̲ ̲в̲ ̲М̲Е̲Н̲Ю̲', callback_data='menu')
-
+            key11 = types.InlineKeyboardButton('Прочее', callback_data='1-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
             markup.row(key12)
             markup.row(key1)
             markup.row(key2)
@@ -360,10 +358,10 @@ def main():
             key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
                                                callback_data='2-10')
             key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='2-11')
-            key12 = types.InlineKeyboardButton('В̲ы̲й̲т̲и̲ ̲в̲ ̲М̲Е̲Н̲Ю̲', callback_data='menu')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
             key13 = types.InlineKeyboardButton('Создать объявление о поиске', callback_data='search')
-            markup.row(key13)
             markup.row(key12)
+            markup.row(key13)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -700,6 +698,8 @@ def main():
                                                callback_data='11-10')
             key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)),
                                                callback_data='11-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -1589,32 +1589,33 @@ def main():
     @bot.message_handler(content_types=['text'])
     def process_start_command(message):
         if message.text == 'Сдать':
-            u_id = message.from_user.id
             t = 'Здорово, что ты готов сдать что-то в аренду! Я помогу тебе составить объявление. ' \
                 'Давай начнем с категории товара, который ты бы хотел сдать в аренду. Выбери подходящее:'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео {}'.format(how_many_obj('Фото и видео', u_id)),
+            key1 = types.InlineKeyboardButton('Фото и видео',
                                               callback_data='1-1')
-            key2 = types.InlineKeyboardButton('Техника для дома {}'.format(how_many_obj('Техника для дома', u_id)),
+            key2 = types.InlineKeyboardButton('Техника для дома',
                                               callback_data='1-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли {}'.format(how_many_obj('Игры и консоли', u_id)),
+            key3 = types.InlineKeyboardButton('Игры и консоли',
                                               callback_data='1-3')
             key4 = types.InlineKeyboardButton(
-                'Туризм и путешествия ({})'.format(how_many_obj('Туризм и путешествия', u_id)),
+                'Туризм и путешествия',
                 callback_data='1-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель {}'.format(how_many_obj('Декор и мебель', u_id)),
+            key5 = types.InlineKeyboardButton('Декор и мебель',
                                               callback_data='1-5')
-            key6 = types.InlineKeyboardButton('Детские товары {}'.format(how_many_obj('Детские товары', u_id)),
+            key6 = types.InlineKeyboardButton('Детские товары',
                                               callback_data='1-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий {}'.format(how_many_obj('Для мероприятий', u_id)),
+            key7 = types.InlineKeyboardButton('Для мероприятий',
                                               callback_data='1-7')
-            key8 = types.InlineKeyboardButton('Инструменты {}'.format(how_many_obj('Инструменты', u_id)),
+            key8 = types.InlineKeyboardButton('Инструменты',
                                               callback_data='1-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта {}'.format(how_many_obj('Товары для спорта', u_id)),
+            key9 = types.InlineKeyboardButton('Товары для спорта',
                                               callback_data='1-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
+            key10 = types.InlineKeyboardButton('Музыка и хобби',
                                                callback_data='1-10')
-            key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='1-11')
+            key11 = types.InlineKeyboardButton('Прочее', callback_data='1-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -1656,6 +1657,8 @@ def main():
                                                callback_data='2-10')
             key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='2-11')
             key13 = types.InlineKeyboardButton('Создать объявление о поиске', callback_data='search')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key13)
             markup.row(key1)
             markup.row(key2)
