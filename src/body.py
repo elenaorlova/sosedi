@@ -34,7 +34,7 @@ def main():
 
         markup = types.InlineKeyboardMarkup()
         key1 = types.InlineKeyboardButton('Сдать товар в аренду', callback_data='1')
-        key2 = types.InlineKeyboardButton('Арендовать чей-то товар', callback_data='2')
+        key2 = types.InlineKeyboardButton('Арендовать товар', callback_data='2')
         key3 = types.InlineKeyboardButton('Посмотреть все мои объявления',
                                           callback_data='3')
         key4 = types.InlineKeyboardButton('Посмотреть все объявления о сдаче',
@@ -1138,7 +1138,7 @@ def main():
                                  "\n\nВладелец:{}".format(x[7], x[2], x[3], x[4], x[5]),
                                  parse_mode='html')
         else:
-            t = 'Похоже, еще никто не создал объявление :( Хочешь попробовать?'
+            t = 'Похоже, еще никто не создал объявление :( Создай своё с помощью кнопки меню: "Арендовать товар"'
             main_menu(message, t)
 
     # ------------------------------ФУНКЦИИ ДЛЯ УДАЛЕНИЯ ОБЬЯВЛЕНИЙ-------------------------------------
