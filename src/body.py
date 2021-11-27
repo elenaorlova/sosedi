@@ -27,9 +27,9 @@ def main():
     # Главное меню
     def main_menu(message, t):
         keyboard_main = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button_menu = ['Сдать', 'Снять', 'Посмотреть мои обьявления']
-        keyboard_main.add(button_menu[0], button_menu[1])
-        keyboard_main.add(button_menu[2])
+        button_menu = ['Сдать', 'Меню', 'Снять', 'Посмотреть мои обьявления']
+        keyboard_main.add(button_menu[0], button_menu[1], button_menu[2])
+        keyboard_main.add(button_menu[3])
         bot.send_message(message.chat.id, t, parse_mode='html', reply_markup=keyboard_main)
 
         markup = types.InlineKeyboardMarkup()
@@ -41,16 +41,31 @@ def main():
                                           callback_data='11')
         key5 = types.InlineKeyboardButton(
             'Посмотреть все объявления о поиске', callback_data='77')
+        # key6 = types.InlineKeyboardButton('Создать объявление о поиске', callback_data='search')
 
         markup.row(key1)
         markup.row(key2)
         markup.row(key3)
         markup.row(key4)
         markup.row(key5)
+        # markup.row(key6)
 
         msg = bot.send_message(message.chat.id,
                                'Выбери, что мы будем делать сегодня:', parse_mode='html', reply_markup=markup)
         return msg
+
+    def how_many_obj(category, u_id):
+        cursor.execute(
+            'SELECT COUNT(category) FROM obj WHERE category = ? '
+            'AND region = (SELECT user_region FROM user WHERE user_id = ?)',
+            (category, u_id,))
+        how_many = ((str(cursor.fetchone())).split(',')[0]).strip('(')
+        print(how_many)
+        if how_many == '0':
+            return ' '
+        else:
+            how_many = ' (' + how_many + ')'
+            return how_many
 
     # ------------------------------Функция для регистрации пользователя------------------------------------------------
     def db_table_val(user_id: int, user_name: str, user_region: str, user_registration: int, chat_id: int):
@@ -71,16 +86,13 @@ def main():
             if info.fetchone() is None:
                 msg = bot.send_message(message.chat.id,
                                        'Добро пожаловать!\n' +
-                                       'Укажи, пожалуйста, свой район, чтобы я мог подключить' +
-                                       'тебя к дружной сети соседей :)')
+                                       'Укажи, пожалуйста, свой город.')
                 if msg.text:
-                    bot.register_next_step_handler(msg, region)
+                    bot.register_next_step_handler(msg, check_city)
             else:
                 u_name = message.from_user.first_name
                 t = 'Чем займемся сегодня, {}?'.format(u_name)
                 main_menu(message, t)
-
-                print(2)
 
     # ----------------------APPLY() - О СОГЛАСИИ УВЕДОМЛЕНИЙ--------------------------------
     def apply(message):
@@ -146,6 +158,23 @@ def main():
             t = 'Не нашёл твой регион, попробуй еще раз. Вот список доступных районов:\n\n{}'.format('\n'.join(get_reg))
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, region)
+
+    def check_city(message):
+        city = ['Москва', 'москва', 'масква', 'Масква', 'Мск', 'Москоу', 'Moscow', 'moscow', 'msc']
+        if message.text in city:
+            msg = bot.send_message(message.chat.id,
+                                   'Укажи, пожалуйста, свой район, чтобы я мог подключить' +
+                                   'тебя к дружной сети соседей :)')
+            if msg.text:
+                bot.register_next_step_handler(msg, region)
+        else:
+            with open("city.txt", "a") as file:
+                file.write('-' + message.text + '\n')
+                file.close()
+            bot.send_message(message.chat.id, 'К сожалению, Соседи пока захватывают только Москву.\n'
+                                              'Я запомнил твой город, чтобы мы скорее могли встретиться!\n'
+                                              '\nА пока следи за нашими обновлениями в Instagram:\n'
+                                              'https://instagram.com/sosedi.sharing')
 
     # ------------------------ОБРАБОТЧИК КОМАНДЫ МЕНЮ--------------------------------------------
     @bot.message_handler(commands=['menu'])
@@ -254,22 +283,40 @@ def main():
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_message_init)
 
+        # --------MENU--------
+        if call.data == 'menu':
+            t = 'Главное меню'
+            main_menu(message, t)
+
         # ---------СДАЕМ---------
         if call.data == '1':
             t = 'Здорово, что ты готов сдать что-то в аренду! Я помогу тебе составить объявление. ' \
                 'Давай начнем с категории товара, который ты бы хотел сдать в аренду. Выбери подходящее:'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео', callback_data='1-1')
-            key2 = types.InlineKeyboardButton('Техника для дома', callback_data='1-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли', callback_data='1-3')
-            key4 = types.InlineKeyboardButton('Туризм и путешествия', callback_data='1-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель', callback_data='1-5')
-            key6 = types.InlineKeyboardButton('Детские товары', callback_data='1-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий', callback_data='1-7')
-            key8 = types.InlineKeyboardButton('Инструменты', callback_data='1-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта', callback_data='1-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби', callback_data='1-10')
+            key1 = types.InlineKeyboardButton('Фото и видео',
+                                              callback_data='1-1')
+            key2 = types.InlineKeyboardButton('Техника для дома',
+                                              callback_data='1-2')
+            key3 = types.InlineKeyboardButton('Игры и консоли',
+                                              callback_data='1-3')
+            key4 = types.InlineKeyboardButton(
+                'Туризм и путешествия',
+                callback_data='1-4')
+            key5 = types.InlineKeyboardButton('Декор и мебель',
+                                              callback_data='1-5')
+            key6 = types.InlineKeyboardButton('Детские товары',
+                                              callback_data='1-6')
+            key7 = types.InlineKeyboardButton('Для мероприятий',
+                                              callback_data='1-7')
+            key8 = types.InlineKeyboardButton('Инструменты',
+                                              callback_data='1-8')
+            key9 = types.InlineKeyboardButton('Товары для спорта',
+                                              callback_data='1-9')
+            key10 = types.InlineKeyboardButton('Музыка и хобби',
+                                               callback_data='1-10')
             key11 = types.InlineKeyboardButton('Прочее', callback_data='1-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -285,20 +332,36 @@ def main():
 
         # --------АРЕНДУЕМ-------
         if call.data == '2':
+            u_id = call.from_user.id
             t = 'Понял тебя, арендуем! Уже вспоминанию все объявления твоих соседей! ' \
                 'Выбери категорию, в которой находится нужный тебе предмет.'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео', callback_data='2-1')
-            key2 = types.InlineKeyboardButton('Техника для дома', callback_data='2-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли', callback_data='2-3')
-            key4 = types.InlineKeyboardButton('Туризм и путешествия', callback_data='2-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель', callback_data='2-5')
-            key6 = types.InlineKeyboardButton('Детские товары', callback_data='2-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий', callback_data='2-7')
-            key8 = types.InlineKeyboardButton('Инструменты', callback_data='2-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта', callback_data='2-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби', callback_data='2-10')
-            key11 = types.InlineKeyboardButton('Прочее', callback_data='2-11')
+            key1 = types.InlineKeyboardButton('Фото и видео {}'.format(how_many_obj('Фото и видео', u_id)),
+                                              callback_data='2-1')
+            key2 = types.InlineKeyboardButton('Техника для дома {}'.format(how_many_obj('Техника для дома', u_id)),
+                                              callback_data='2-2')
+            key3 = types.InlineKeyboardButton('Игры и консоли {}'.format(how_many_obj('Игры и консоли', u_id)),
+                                              callback_data='2-3')
+            key4 = types.InlineKeyboardButton(
+                'Туризм и путешествия {}'.format(how_many_obj('Туризм и путешествия', u_id)),
+                callback_data='2-4')
+            key5 = types.InlineKeyboardButton('Декор и мебель {}'.format(how_many_obj('Декор и мебель', u_id)),
+                                              callback_data='2-5')
+            key6 = types.InlineKeyboardButton('Детские товары {}'.format(how_many_obj('Детские товары', u_id)),
+                                              callback_data='2-6')
+            key7 = types.InlineKeyboardButton('Для мероприятий {}'.format(how_many_obj('Для мероприятий', u_id)),
+                                              callback_data='2-7')
+            key8 = types.InlineKeyboardButton('Инструменты {}'.format(how_many_obj('Инструменты', u_id)),
+                                              callback_data='2-8')
+            key9 = types.InlineKeyboardButton('Товары для спорта {}'.format(how_many_obj('Товары для спорта', u_id)),
+                                              callback_data='2-9')
+            key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
+                                               callback_data='2-10')
+            key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='2-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            key13 = types.InlineKeyboardButton('Создать объявление о поиске', callback_data='search')
+            markup.row(key12)
+            markup.row(key13)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -314,60 +377,192 @@ def main():
 
         # --------АРЕНДУЕМ ПОИСК-----------------------
         if call.data == '2-1':
-            t = 'А что именно из (Фото и видео) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Фото и видео'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-2':
-            t = 'А что именно из (Техника для дома) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Техника для дома'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-3':
-            t = 'А что именно из (Игры и консоли) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Игры и консоли'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-4':
-            t = 'А что именно из (Туризм и путешествия) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Туризм и путешествия'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-5':
-            t = 'А что именно из (Декор и мебель) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Декор и мебель'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-6':
-            t = 'А что именно из (Детские товары) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Детские товары'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-7':
-            t = 'А что именно из (Для мероприятий) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Для мероприятий'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-8':
-            t = 'А что именно из (Инструменты) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Инструменты'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-9':
-            t = 'А что именно из (Товары для спорта) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Товары для спорта'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-10':
-            t = 'А что именно из (Музыка и хобби) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Музыка и хобби'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-11':
-            t = 'А что именно из (Прочее) ты бы хотел арендовать? Используй слово или короткую фразу.'
-            msg = bot.send_message(message.chat.id, t)
             category = 'Прочее'
-            bot.register_next_step_handler(msg, search_cat1, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, search_cat1, category)
 
         # ---------------------------------------------------------------------------------------------------
         if call.data == '2-1+':
@@ -477,19 +672,34 @@ def main():
 
         # --===---ПОСМОТРЕТЬ ВСЕ ОБЬЯВЛЕНИЯ О СДАЧЕ В КАТЕГОРИИ-----------
         if call.data == '11':
+            u_id = call.from_user.id
             t = 'Выбери категорию:'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео', callback_data='11-1')
-            key2 = types.InlineKeyboardButton('Техника для дома', callback_data='11-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли', callback_data='11-3')
-            key4 = types.InlineKeyboardButton('Туризм и путешествия', callback_data='11-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель', callback_data='11-5')
-            key6 = types.InlineKeyboardButton('Детские товары', callback_data='11-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий', callback_data='11-7')
-            key8 = types.InlineKeyboardButton('Инструменты', callback_data='11-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта', callback_data='11-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби', callback_data='11-10')
-            key11 = types.InlineKeyboardButton('Прочее', callback_data='11-11')
+            key1 = types.InlineKeyboardButton('Фото и видео {}'.format(how_many_obj('Фото и видео', u_id)),
+                                              callback_data='11-1')
+            key2 = types.InlineKeyboardButton('Техника для дома {}'.format(how_many_obj('Техника для дома', u_id)),
+                                              callback_data='11-2')
+            key3 = types.InlineKeyboardButton('Игры и консоли {}'.format(how_many_obj('Игры и консоли', u_id)),
+                                              callback_data='11-3')
+            key4 = types.InlineKeyboardButton(
+                'Туризм и путешествия {}'.format(how_many_obj('Туризм и путешествия', u_id)),
+                callback_data='11-4')
+            key5 = types.InlineKeyboardButton('Декор и мебель {}'.format(how_many_obj('Декор и мебель', u_id)),
+                                              callback_data='11-5')
+            key6 = types.InlineKeyboardButton('Детские товары {}'.format(how_many_obj('Детские товары', u_id)),
+                                              callback_data='11-6')
+            key7 = types.InlineKeyboardButton('Для мероприятий {}'.format(how_many_obj('Для мероприятий', u_id)),
+                                              callback_data='11-7')
+            key8 = types.InlineKeyboardButton('Инструменты {}'.format(how_many_obj('Инструменты', u_id)),
+                                              callback_data='11-8')
+            key9 = types.InlineKeyboardButton('Товары для спорта {}'.format(how_many_obj('Товары для спорта', u_id)),
+                                              callback_data='11-9')
+            key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
+                                               callback_data='11-10')
+            key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)),
+                                               callback_data='11-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -504,59 +714,191 @@ def main():
             bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t, reply_markup=markup)
         if call.data == '11-1':
             category = 'Фото и видео'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-2':
             category = 'Техника для дома'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-3':
             category = 'Игры и консоли'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-4':
             category = 'Туризм и путешествия'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-5':
             category = 'Декор и мебель'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-6':
             category = 'Детские товары'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-7':
             category = 'Для мероприятий'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-8':
             category = 'Инструменты'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-9':
             category = 'Товары для спорта'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-10':
             category = 'Музыка и хобби'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
         if call.data == '11-11':
             category = 'Прочее'
-            t = 'Ищем в категории {}, все верно?'.format(category)
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, look_obj, category)
+            u_id = call.from_user.id
+            if how_many_obj(category, u_id) == '0':
+                t = 'В категории({}) нету объявлений, давай создадим запрос на поиск?'.format(category)
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                # bot.send_message(message.chat.id, t, reply_markup=markup)
+                bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
+                                      reply_markup=markup)
+            else:
+                t = 'Ищем в категории {}, все верно?'.format(category)
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, look_obj, category)
 
         # ----------ПОСМОТРЕТЬ ВСЕ ОБЪЯВЛЕНИЯ О ПОИСКЕ В АРЕНДУ------------
         if call.data == '77':
@@ -710,6 +1052,16 @@ def main():
             t = 'Введи название своего обьявления, которое ты хочешь удалить.'
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, delete_search_obj)
+
+        # --------сОЗДАТЬ ОБЪЯВЛЕНИЕ О ПОИСКЕ В АРЕНДУ-------------
+        if call.data == 'search':
+            t = 'Хочешь создать объявление о поиске в аренду?'
+            markup = types.InlineKeyboardMarkup()
+            key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+            key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+            markup.row(key1)
+            markup.row(key2)
+            bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t, reply_markup=markup)
 
     # -------------------------ФУНКЦИЯ ПОЛУЧЕНИЯ УВЕДОМЛЕНИЙ В НЕСКОЛЬКИХ РАЙОНАХ-------------------------------
     def search_message_init(message):
@@ -871,6 +1223,7 @@ def main():
                        "AND category = ? AND region = ?", (cat, u_region[0],))
         result = cursor.fetchall()
         if len(u_text) > 2 and u_text.isdigit() == 0:
+            r = 0
             for x in result:
                 a = x[2]
                 if u_text.lower() in a.lower():
@@ -878,13 +1231,23 @@ def main():
                     bot.send_photo(message.chat.id, x[6])
                     bot.send_message(message.chat.id, 'Название: {}\n\nЦена: {}р\n\nОписание: {}\n\nВладелец: {}'
                                      .format(x[2], x[3], x[4], x[5]))
-            t = 'Нашел ли ты нужное или все не то?'
-            markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Подходит!', callback_data='2-1+')
-            key2 = types.InlineKeyboardButton('Я не нашёл, что искал', callback_data='2-1-')
-            markup.row(key1)
-            markup.row(key2)
-            bot.send_message(message.chat.id, t, reply_markup=markup)
+                    r = r + 1
+            if r != 0:
+                t = 'Нашел ли ты нужное или все не то?'
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Подходит!', callback_data='2-1+')
+                key2 = types.InlineKeyboardButton('Я не нашёл, что искал', callback_data='2-1-')
+                markup.row(key1)
+                markup.row(key2)
+                bot.send_message(message.chat.id, t, reply_markup=markup)
+            if r == 0:
+                t = 'Таких объявлений нет, давай создадим запрос?'
+                markup = types.InlineKeyboardMarkup()
+                key1 = types.InlineKeyboardButton('Давай', callback_data='2-1---')
+                key2 = types.InlineKeyboardButton('Нет, спасибо', callback_data='2-1-++')
+                markup.row(key1)
+                markup.row(key2)
+                bot.send_message(message.chat.id, t, reply_markup=markup)
         else:
             msg = bot.send_message(message.chat.id, 'Ошибка! Попробуй написать по другому:')
             bot.register_next_step_handler(msg, search_cat1, category)
@@ -901,7 +1264,7 @@ def main():
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_name)
         if len(u_text) > 2 and u_text.isdigit() == 0:
-            cursor.execute('SELECT user_region FROM user WHERE user_id = ?', (u_id, ))
+            cursor.execute('SELECT user_region FROM user WHERE user_id = ?', (u_id,))
             user_region = cursor.fetchone()[0]
             cursor.execute('INSERT INTO search_obj (u_id, obj_name, u_name, region) VALUES (?, ?, ?, ?)',
                            (u_id, u_text, u_name, user_region))
@@ -1214,11 +1577,11 @@ def main():
                                      parse_mode='html', reply_markup=markup)
             return reply
         else:
-            if message.text.lower() in stop_text:
-                t = 'Возвращаю меню...'
-                return main_menu(message, t)
+            print(message)
             msg = bot.send_message(message.chat.id, 'Ошибка! Отправь фото со сжатием, 1шт.')
             bot.register_next_step_handler(msg, init_obj)
+
+    # ---------------------------------------Функия подсчета кол-ва обьявлений в категории------------------------------
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -1229,17 +1592,30 @@ def main():
             t = 'Здорово, что ты готов сдать что-то в аренду! Я помогу тебе составить объявление. ' \
                 'Давай начнем с категории товара, который ты бы хотел сдать в аренду. Выбери подходящее:'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео', callback_data='1-1')
-            key2 = types.InlineKeyboardButton('Техника для дома', callback_data='1-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли', callback_data='1-3')
-            key4 = types.InlineKeyboardButton('Туризм и путешествия', callback_data='1-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель', callback_data='1-5')
-            key6 = types.InlineKeyboardButton('Детские товары', callback_data='1-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий', callback_data='1-7')
-            key8 = types.InlineKeyboardButton('Инструменты', callback_data='1-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта', callback_data='1-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби', callback_data='1-10')
+            key1 = types.InlineKeyboardButton('Фото и видео',
+                                              callback_data='1-1')
+            key2 = types.InlineKeyboardButton('Техника для дома',
+                                              callback_data='1-2')
+            key3 = types.InlineKeyboardButton('Игры и консоли',
+                                              callback_data='1-3')
+            key4 = types.InlineKeyboardButton(
+                'Туризм и путешествия',
+                callback_data='1-4')
+            key5 = types.InlineKeyboardButton('Декор и мебель',
+                                              callback_data='1-5')
+            key6 = types.InlineKeyboardButton('Детские товары',
+                                              callback_data='1-6')
+            key7 = types.InlineKeyboardButton('Для мероприятий',
+                                              callback_data='1-7')
+            key8 = types.InlineKeyboardButton('Инструменты',
+                                              callback_data='1-8')
+            key9 = types.InlineKeyboardButton('Товары для спорта',
+                                              callback_data='1-9')
+            key10 = types.InlineKeyboardButton('Музыка и хобби',
+                                               callback_data='1-10')
             key11 = types.InlineKeyboardButton('Прочее', callback_data='1-11')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -1254,20 +1630,36 @@ def main():
             bot.send_message(message.chat.id, t, parse_mode='html', reply_markup=markup)
 
         if message.text == 'Снять':
+            u_id = message.from_user.id
             t = 'Понял тебя, арендуем! Уже вспоминанию все объявления твоих соседей! ' \
                 'Выбери категорию, в которой находится нужный тебе предмет.'
             markup = types.InlineKeyboardMarkup()
-            key1 = types.InlineKeyboardButton('Фото и видео', callback_data='2-1')
-            key2 = types.InlineKeyboardButton('Техника для дома', callback_data='2-2')
-            key3 = types.InlineKeyboardButton('Игры и консоли', callback_data='2-3')
-            key4 = types.InlineKeyboardButton('Туризм и путешествия', callback_data='2-4')
-            key5 = types.InlineKeyboardButton('Декор и мебель', callback_data='2-5')
-            key6 = types.InlineKeyboardButton('Детские товары', callback_data='2-6')
-            key7 = types.InlineKeyboardButton('Для мероприятий', callback_data='2-7')
-            key8 = types.InlineKeyboardButton('Инструменты', callback_data='2-8')
-            key9 = types.InlineKeyboardButton('Товары для спорта', callback_data='2-9')
-            key10 = types.InlineKeyboardButton('Музыка и хобби', callback_data='2-10')
-            key11 = types.InlineKeyboardButton('Прочее', callback_data='2-11')
+            key1 = types.InlineKeyboardButton('Фото и видео {}'.format(how_many_obj('Фото и видео', u_id)),
+                                              callback_data='2-1')
+            key2 = types.InlineKeyboardButton('Техника для дома {}'.format(how_many_obj('Техника для дома', u_id)),
+                                              callback_data='2-2')
+            key3 = types.InlineKeyboardButton('Игры и консоли {}'.format(how_many_obj('Игры и консоли', u_id)),
+                                              callback_data='2-3')
+            key4 = types.InlineKeyboardButton(
+                'Туризм и путешествия {}'.format(how_many_obj('Туризм и путешествия', u_id)),
+                callback_data='2-4')
+            key5 = types.InlineKeyboardButton('Декор и мебель {}'.format(how_many_obj('Декор и мебель', u_id)),
+                                              callback_data='2-5')
+            key6 = types.InlineKeyboardButton('Детские товары {}'.format(how_many_obj('Детские товары', u_id)),
+                                              callback_data='2-6')
+            key7 = types.InlineKeyboardButton('Для мероприятий {}'.format(how_many_obj('Для мероприятий', u_id)),
+                                              callback_data='2-7')
+            key8 = types.InlineKeyboardButton('Инструменты {}'.format(how_many_obj('Инструменты', u_id)),
+                                              callback_data='2-8')
+            key9 = types.InlineKeyboardButton('Товары для спорта {}'.format(how_many_obj('Товары для спорта', u_id)),
+                                              callback_data='2-9')
+            key10 = types.InlineKeyboardButton('Музыка и хобби {}'.format(how_many_obj('Музыка и хобби', u_id)),
+                                               callback_data='2-10')
+            key11 = types.InlineKeyboardButton('Прочее {}'.format(how_many_obj('Прочее', u_id)), callback_data='2-11')
+            key13 = types.InlineKeyboardButton('Создать объявление о поиске', callback_data='search')
+            key12 = types.InlineKeyboardButton('Выйти в МЕНЮ', callback_data='menu')
+            markup.row(key12)
+            markup.row(key13)
             markup.row(key1)
             markup.row(key2)
             markup.row(key3)
@@ -1289,6 +1681,10 @@ def main():
             markup.row(key1)
             markup.row(key2)
             bot.send_message(message.chat.id, t, reply_markup=markup)
+
+        if message.text == 'Меню':
+            t = 'Главное Меню'
+            main_menu(message, t)
 
     # ------------------------------------------------------------------------------------------------------------------
 
