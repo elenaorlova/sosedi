@@ -1000,7 +1000,8 @@ def main():
 
         # -----ПОДТВЕРДИТЬ ТОЛЬКО ЧТО СОЗДАННОЕ ОБЬЯВЛЕНИЕ(КАТ_1)------
         if call.data == '01':
-            t = 'Супер! Объявление добавлено.'
+            t = 'Супер! Объявление добавлено.\n‼️ Важно: перед тем, как сдать товар сфотографируй паспорт того, ' \
+                'кому сдаёшь. А если вещь дорога для тебя, то подумай, что можешь взять в залог.\nПодробнее: https://telegra.ph/Osnovy-bezopasnoj-sdelki-12-13'
             main_menu(message, t)
 
         # ----РЕДАКТИРОВАТЬ ТОЛЬКО ЧТО СОЗДАННОЕ ОБЬЯВЛЕНИЕ(КАТ_1)---------------
@@ -1233,7 +1234,8 @@ def main():
                                      .format(x[2], x[3], x[4], x[5]))
                     r = r + 1
             if r != 0:
-                t = 'Нашел ли ты нужное или все не то?'
+                t = 'Нашел ли ты нужное или все не то?\n‼️ Важно: аккуратно относись к вещам, которые берёшь в аренду.' \
+                    'Мы советуем делать фотографии дефектов перед арендой, чтобы потом не было конфликтов.\nПодробнее: https://telegra.ph/Osnovy-bezopasnoj-sdelki-12-13'
                 markup = types.InlineKeyboardMarkup()
                 key1 = types.InlineKeyboardButton('Подходит!', callback_data='2-1+')
                 key2 = types.InlineKeyboardButton('Я не нашёл, что искал', callback_data='2-1-')
@@ -1274,7 +1276,7 @@ def main():
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_text)
         else:
-            t = 'Не корректный ввод! Попробуй написать по другому :)'
+            t = 'Некорректный ввод! Попробуй написать по другому :)'
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_name)
 
@@ -1309,7 +1311,7 @@ def main():
                                      reply_markup=markup)
             return reply
         else:
-            t = 'Не корректный ввод! Попробуй написать по другому :)'
+            t = 'Некорректный ввод! Попробуй написать по другому :)'
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_text)
 
@@ -1348,7 +1350,7 @@ def main():
                                      reply_markup=markup)
             return reply
         else:
-            t = 'Не корректный ввод! Попробуй написать по другому :)'
+            t = 'Некорректный ввод! Попробуй написать по другому :)'
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_name_edit)
 
