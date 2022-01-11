@@ -120,7 +120,7 @@ def main():
     def region(message):
         u_id = message.from_user.id
         chat_id = message.chat.id
-        u_name = message.from_user.first_name
+        u_name = "@" + message.from_user.username
         u_region = message.text
         get_reg = ["Академический", "Алексеевский", "Алтуфьевский", "Арбат", "Аэропорт",
                    "Бабушкинский", "Басманный", "Беговой", "Бескудниковский", "Бибирево",
