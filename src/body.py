@@ -3,6 +3,7 @@ from telebot import types
 import config
 import time
 import sqlite3
+import datetime
 
 
 def main():
@@ -68,10 +69,11 @@ def main():
             return how_many
 
     # ------------------------------Функция для регистрации пользователя------------------------------------------------
-    def db_table_val(user_id: int, user_name: str, user_region: str, user_registration: int, chat_id: int):
+    def db_table_val(user_id: int, user_name: str, user_region: str, user_registration: int, chat_id: int,
+                     d: str):
         cursor.execute('INSERT INTO user (user_id, user_name, user_region, user_registration, '
-                       'chat_id) VALUES (?, ?, ?, ?, ?)',
-                       (user_id, user_name, user_region, user_registration, chat_id))
+                       'chat_id, datetime) VALUES (?, ?, ?, ?, ?, ?)',
+                       (user_id, user_name, user_region, user_registration, chat_id, d))
         conn.commit()
 
     # --------------------------------------ОБРАБОТЧИК КОМАНДЫ СТАРТ----------------------------------------------------
@@ -81,6 +83,7 @@ def main():
         if check_username(message) == 0:
             pass
         else:
+            print(message)
             u_id = message.from_user.id
             info = cursor.execute('SELECT * FROM user WHERE user_id=?', (u_id,))
             if info.fetchone() is None:
@@ -120,7 +123,7 @@ def main():
     def region(message):
         u_id = message.from_user.id
         chat_id = message.chat.id
-        u_name = message.from_user.first_name
+        u_name = "@" + message.from_user.username
         u_region = message.text
         get_reg = ["Академический", "Алексеевский", "Алтуфьевский", "Арбат", "Аэропорт",
                    "Бабушкинский", "Басманный", "Беговой", "Бескудниковский", "Бибирево",
@@ -151,7 +154,9 @@ def main():
 
         for x in get_reg:
             if u_region.lower() == x.lower():
-                db_table_val(user_id=u_id, user_name=u_name, user_region=x, user_registration=3, chat_id=chat_id)
+                date = (str(datetime.datetime.now().today()))[:16]
+                db_table_val(user_id=u_id, user_name=u_name, user_region=x, user_registration=3, chat_id=chat_id,
+                             d=date)
                 apply(message)
                 break
         else:
@@ -1261,6 +1266,7 @@ def main():
         u_text = message.text
         u_id = message.from_user.id
         u_name = '@' + message.from_user.username
+        date = (str(datetime.datetime.now().today()))[:16]
         if len(u_text) > 30 or u_text.isdigit() == 1:
             t = 'Слишком длинно для названия! Попробуй написать кратко :)'
             msg = bot.send_message(message.chat.id, t)
@@ -1268,8 +1274,8 @@ def main():
         if len(u_text) > 2 and u_text.isdigit() == 0:
             cursor.execute('SELECT user_region FROM user WHERE user_id = ?', (u_id,))
             user_region = cursor.fetchone()[0]
-            cursor.execute('INSERT INTO search_obj (u_id, obj_name, u_name, region) VALUES (?, ?, ?, ?)',
-                           (u_id, u_text, u_name, user_region))
+            cursor.execute('INSERT INTO search_obj (u_id, obj_name, u_name, region, datetime) VALUES (?, ?, ?, ?, ?)',
+                           (u_id, u_text, u_name, user_region, date))
             conn.commit()
             t = 'Отлично, добавь комментарий к твоему объявлению.\nНапример, можешь написать цену и ' \
                 'срок, на который тебе нужна аренда.'
@@ -1311,7 +1317,7 @@ def main():
                                      reply_markup=markup)
             return reply
         else:
-            t = 'Некорректный ввод! Попробуй написать по другому :)'
+            t = 'Не корректный ввод! Попробуй написать по другому :)'
             msg = bot.send_message(message.chat.id, t)
             bot.register_next_step_handler(msg, search_obj_text)
 
@@ -1498,11 +1504,13 @@ def main():
         user_name = '@' + message.from_user.username
         u_text = message.text
         u_obj_id = message.from_user.id
+        date = (str(datetime.datetime.now().today()))[:16]
         cursor.execute('SELECT user_region FROM user WHERE user_id = ?', (u_obj_id,))
         user_region = cursor.fetchone()
         if u_text.isdigit() == 0 and len(u_text) > 2:
-            cursor.execute('INSERT INTO obj (u_id, name_cat1_obj, user_name, category, region) VALUES (?, ?, ?, ?, ?)',
-                           (u_obj_id, u_text, user_name, category, user_region[0]))
+            cursor.execute('INSERT INTO obj (u_id, name_cat1_obj, user_name, category, region, datetime) '
+                           'VALUES (?, ?, ?, ?, ?, ?)',
+                           (u_obj_id, u_text, user_name, category, user_region[0], date))
             conn.commit()
             msg = bot.send_message(message.chat.id, 'Понял тебя. Давай теперь определимся с ценой. '
                                                     'Какую сумму за сутки аренды ты бы хотел получить?',
