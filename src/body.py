@@ -237,9 +237,14 @@ def main():
         if check_username(message) == 0:
             pass
         else:
-            t = 'Хочешь поменять свой район? Введи название района, например: Северный'
-            msg = bot.send_message(message.chat.id, t)
-            bot.register_next_step_handler(msg, change_user_region)
+            info = cursor.execute('SELECT * FROM user WHERE user_id=? AND user_region LIKE ?',
+                                  (message.from_user.id, '%undefined%',))
+            if info.fetchone() is None:
+                t = 'Хочешь поменять свой район? Введи название района, например: Северный'
+                msg = bot.send_message(message.chat.id, t)
+                bot.register_next_step_handler(msg, change_user_region)
+            else:
+                return welcome(message)
 
     def change_user_region(message):
         if message.text.lower() in stop_text:
