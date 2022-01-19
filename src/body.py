@@ -455,7 +455,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-2':
@@ -472,7 +473,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-3':
@@ -489,7 +491,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-4':
@@ -506,7 +509,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-5':
@@ -523,7 +527,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-6':
@@ -540,7 +545,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-7':
@@ -557,7 +563,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-8':
@@ -574,7 +581,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-9':
@@ -591,7 +599,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-10':
@@ -608,7 +617,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
         if call.data == '2-11':
@@ -625,7 +635,8 @@ def main():
                 bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=t,
                                       reply_markup=markup)
             else:
-                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.'.format(category)
+                t = 'А что именно из ({}) ты бы хотел арендовать? Используй слово или короткую фразу.\n\nЕсли хочешь ' \
+                    'посмотреть все объявления, то напиши «все»'.format(category)
                 msg = bot.send_message(message.chat.id, t)
                 bot.register_next_step_handler(msg, search_cat1, category)
 
