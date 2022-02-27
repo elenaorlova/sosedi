@@ -802,7 +802,7 @@ def main():
                         key1 = types.InlineKeyboardButton('Удалить', callback_data='delete1')
                         markup.row(key1)
                         bot.send_message(message.chat.id,
-                                         "Категория: {}\n\nНазвание: {}\n\nЦена:{}р\n\nОписание: {}"
+                                         "Категория: {}\n\nНазвание: {}\n\nЦена: {}р\n\nОписание: {}"
                                          "\n\nВладелец: {}".format(x.category, x.name_cat1_obj, x.money_cat1, x.cat_1,
                                                                    x.user_name),
                                          parse_mode='html', reply_markup=markup, timeout=10)
@@ -1375,7 +1375,7 @@ def main():
                 bot.send_photo(message.from_user.id, x.photo)
                 bot.send_message(message.from_user.id,
                                  "Категория: {}\n\nНазвание: {}\n\nЦена: {}р\n\nОписание :{}"
-                                 "\n\nВладелец:{}".format(x.category, x.name_cat1_obj, x.money_cat1, x.cat_1,
+                                 "\n\nВладелец: {}".format(x.category, x.name_cat1_obj, x.money_cat1, x.cat_1,
                                                           x.user_name),
                                  parse_mode='html', timeout=10)
             t = 'Нашел ли ты нужное или все не то?\n\n‼️ Важно: перед арендой изучи правила, которые помогут избежать ' \
@@ -1927,7 +1927,7 @@ def main():
                              parse_mode='html', timeout=10)
             bot.send_photo(message.chat.id, result.photo)
             reply = bot.send_message(message.chat.id,
-                                     "Категория: {}\n\nНазвание: {}\nЦена:{}р\nОписание: {}\nВладелец: {}\n"
+                                     "Категория: {}\n\nНазвание: {}\nЦена: {}р\nОписание: {}\nВладелец: {}\n"
                                      "Все ли я понял правильно или хочешь "
                                      "что-то исправить в объявлении?".format(result.category, result.name_cat1_obj,
                                                                              result.money_cat1, result.cat_1,
